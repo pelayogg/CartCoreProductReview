@@ -1,4 +1,4 @@
-     <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -462,6 +462,121 @@
             border-color: currentColor;
             box-shadow: 0 0 30px currentColor;
         }
+
+        /* FAQ Specific Styles */
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--border-strong);
+        }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--text-primary);
+        }
+
+        .faq-question.active {
+            color: var(--text-primary);
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--accent-cyan);
+        }
+
+        .faq-icon.active {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.3s ease;
+            opacity: 0;
+        }
+
+        .faq-answer.active {
+            max-height: 500px;
+            opacity: 1;
+            padding-bottom: 24px;
+        }
+
+        .faq-answer p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .faq-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .faq-tag-blue {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(0, 122, 255, 0.2);
+        }
+
+        .faq-tag-purple {
+            background: rgba(175, 82, 222, 0.1);
+            color: var(--accent-purple);
+            border: 1px solid rgba(175, 82, 222, 0.2);
+        }
+
+        .faq-tag-pink {
+            background: rgba(255, 45, 85, 0.1);
+            color: var(--accent-pink);
+            border: 1px solid rgba(255, 45, 85, 0.2);
+        }
+
+        .faq-tag-green {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        .faq-tag-orange {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -480,6 +595,7 @@
                 <a href="#wishlist" class="nav-link">¿Qué es Wishlist Core?</a>
                 <a href="#evolution" class="nav-link">¿Qué es Cart Core a lo largo del tiempo?</a>
                 <a href="#2026" class="nav-link">¿Qué es Cart Core en 2026?</a>
+                <a href="#faq" class="nav-link">FAQ</a>
             </div>
         </div>
     </nav>
@@ -545,6 +661,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Section 2: Evolution Over Time -->
     <section id="evolution" class="section-spacing relative">
@@ -621,7 +740,7 @@
                 <div class="reveal timeline-item active" style="transition-delay: 0.4s;">
                     <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
                         <span class="text-2xl font-display font-semibold text-white">2026</span>
-                        <h3 class="subsection-title text-xl md:text-2xl text-white">Más allá del "clásico carrito” </h3>
+                        <h3 class="subsection-title text-xl md:text-2xl text-white">Más allá del "clásico carrito"</h3>
                     </div>
                     <p class="body-large text-white max-w-2xl">
                         ¿Y si no sólo gestionamos carritos con una intención de compra? <span class="text-pink-400">Wishlist</span>
@@ -744,7 +863,7 @@
             </div>
 
             <!-- Pillars -->
-            <h3 class="section-title font-display mb-6"> Nuevas capacidades para nuevos retos</h3>
+            <h3 class="section-title font-display mb-6">Nuevas capacidades para nuevos retos</h3>
             <div class="grid md:grid-cols-4 gap-6 mb-20 reveal">
                 <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
                     <div class="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
@@ -774,7 +893,10 @@
                     <h4 class="font-medium text-sm mb-1">Control de mutabilidad</h4>
                     <p class="text-xs text-white/40">Un carrito podrá ser modificable siempre o no dependiendo de su propósito</p>
                 </div>
-                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+            </div>
+            
+            <div class="grid md:grid-cols-1 gap-6 mb-20 reveal">
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all max-w-xs mx-auto">
                     <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
                         <i data-lucide="circle-plus" class="w-6 h-6 text-orange-400"></i>
                     </div>
@@ -936,6 +1058,371 @@
         </div>
     </section>
 
+    <!-- Section 4: FAQ -->
+    <section id="faq" class="section-spacing relative">
+        <div class="content-spacing max-w-4xl mx-auto">
+            <div class="reveal mb-16 text-center">
+                <span class="label mb-4 block text-orange-400">Preguntas Frecuentes</span>
+                <h2 class="section-title font-display mb-6">¿Tienes dudas sobre Cart Core?</h2>
+                <p class="body-large max-w-2xl mx-auto">
+                    Resolvemos las preguntas más comunes sobre arquitectura, implementación y uso del sistema.
+                </p>
+            </div>
+
+            <div class="space-y-4 reveal">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.1s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 flex-shrink-0">
+                                <i data-lucide="help-circle" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Qué diferencia hay entre Default, Subcart y Wishlist?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-blue">Conceptos</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                Cada tipo de carrito está diseñado para un propósito específico:
+                            </p>
+                            <ul class="space-y-3 mb-4">
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-blue-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Default:</span>
+                                        <span class="text-white/60"> Carrito estándar de compra con validaciones estrictas de producto y stock. Es el funnel clásico de e-commerce.</span>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-purple-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Subcart:</span>
+                                        <span class="text-white/60"> Carritos flexibles para experiencias específicas (streaming, eventos, etc.) con validaciones configurables.</span>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-pink-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Wishlist:</span>
+                                        <span class="text-white/60"> Listas de deseos sin intención inmediata de compra. Permiten compartir y notificar disponibilidad.</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.15s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20 flex-shrink-0">
+                                <i data-lucide="git-branch" class="w-5 h-5 text-purple-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Cómo se gestionan múltiples carritos por usuario?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-purple">Arquitectura</span>
+                                    <span class="faq-tag faq-tag-green">Multi-tenant</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                Cart Core utiliza un modelo de "contenedores lógicos" donde cada usuario puede tener N carritos de diferentes tipos simultáneamente:
+                            </p>
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="fingerprint" class="w-4 h-4 text-cyan-400"></i>
+                                        <span class="text-sm font-medium text-white">Identificación</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Cada carrito tiene un UUID único vinculado al user ID</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="filter" class="w-4 h-4 text-cyan-400"></i>
+                                        <span class="text-sm font-medium text-white">Filtrado</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Query params permiten filtrar por tipo, canal y estado</p>
+                                </div>
+                            </div>
+                            <p class="body-small">
+                                El sistema mantiene coherencia mediante eventos de dominio que sincronizan el estado entre todos los carritos activos de un usuario.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.2s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center border border-green-500/20 flex-shrink-0">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Qué validaciones se aplican por defecto?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-green">Validación</span>
+                                    <span class="faq-tag faq-tag-blue">Stock</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                Las validaciones varían según el tipo de carrito y el contexto de la operación:
+                            </p>
+                            <div class="space-y-3 mb-4">
+                                <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                        <span class="text-sm text-white">Validación de Producto</span>
+                                    </div>
+                                    <span class="text-xs text-white/40">Via Product Reader</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                        <span class="text-sm text-white">Validación de Stock</span>
+                                    </div>
+                                    <span class="text-xs text-white/40">Síncrona/Asíncrona</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                        <span class="text-sm text-white">Límites de Items</span>
+                                    </div>
+                                    <span class="text-xs text-white/40">Configurables por tipo</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                        <span class="text-sm text-white">Reglas de Negocio</span>
+                                    </div>
+                                    <span class="text-xs text-white/40">Contextuales</span>
+                                </div>
+                            </div>
+                            <p class="body-small text-white/60">
+                                <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                                En modo streaming, por ejemplo, el stock se valida de forma diferida para optimizar la velocidad.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.25s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-pink-500/10 flex items-center justify-center border border-pink-500/20 flex-shrink-0">
+                                <i data-lucide="share-2" class="w-5 h-5 text-pink-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Cómo funciona el compartir listas?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-pink">Wishlist</span>
+                                    <span class="faq-tag faq-tag-purple">Social</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                El sistema de compartir permite colaboración en tiempo real con diferentes niveles de permisos:
+                            </p>
+                            <div class="faq-grid mb-4">
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="eye" class="w-4 h-4 text-pink-400"></i>
+                                        <span class="text-sm font-medium text-white">Visor</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Solo puede ver items y seguir cambios</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="edit-3" class="w-4 h-4 text-pink-400"></i>
+                                        <span class="text-sm font-medium text-white">Editor</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Puede añadir, eliminar y modificar items</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="users" class="w-4 h-4 text-pink-400"></i>
+                                        <span class="text-sm font-medium text-white">Colaborador</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Editor + invitar a otros usuarios</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i data-lucide="crown" class="w-4 h-4 text-pink-400"></i>
+                                        <span class="text-sm font-medium text-white">Propietario</span>
+                                    </div>
+                                    <p class="text-xs text-white/50">Control total incluyendo eliminación</p>
+                                </div>
+                            </div>
+                            <p class="body-small">
+                                Las listas pueden ser <span class="text-white">públicas</span> (accesibles por URL) o <span class="text-white">privadas</span> (solo por invitación directa).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.3s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 flex-shrink-0">
+                                <i data-lucide="zap" class="w-5 h-5 text-cyan-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Qué es REX y cómo se integra?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-blue">REX</span>
+                                    <span class="faq-tag faq-tag-purple">2026</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                <span class="text-cyan-400 font-medium">REX (Retail Experience)</span> representa la evolución de Cart Core hacia experiencias sin intención de compra tradicional:
+                            </p>
+                            <ul class="space-y-3 mb-4">
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Inspiración:</span>
+                                        <span class="text-white/60"> Colecciones de items para proyectos futuros sin checkout inmediato</span>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Planificación:</span>
+                                        <span class="text-white/60"> Carritos para eventos (bodas, reformas) con timeline y presupuesto</span>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-cyan-400 mt-2 flex-shrink-0"></div>
+                                    <div>
+                                        <span class="text-white font-medium">Comparación:</span>
+                                        <span class="text-white/60"> Listas paralelas para evaluar alternativas antes de decidir</span>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="p-4 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/20">
+                                <p class="text-sm text-white/80">
+                                    <i data-lucide="lightbulb" class="w-4 h-4 inline mr-2 text-cyan-400"></i>
+                                    REX utiliza la misma infraestructura de Cart Core pero con reglas de validación relajadas y persistencia extendida.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 6 -->
+                <div class="faq-item surface rounded-2xl px-6 reveal" style="transition-delay: 0.35s;">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 flex-shrink-0">
+                                <i data-lucide="activity" class="w-5 h-5 text-orange-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-base">¿Cómo se garantiza la observabilidad?</h4>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="faq-tag faq-tag-orange">Observabilidad</span>
+                                    <span class="faq-tag faq-tag-green">SLA</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-icon">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="pl-14">
+                            <p class="body-small mb-4">
+                                Cart Core implementa tres pilares de observabilidad distribuida:
+                            </p>
+                            <div class="grid md:grid-cols-3 gap-4 mb-4">
+                                <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
+                                        <i data-lucide="bar-chart-2" class="w-5 h-5 text-orange-400"></i>
+                                    </div>
+                                    <h5 class="text-sm font-medium text-white mb-1">Métricas</h5>
+                                    <p class="text-xs text-white/50">Latencia, throughput, errores por endpoint</p>
+                                </div>
+                                <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
+                                        <i data-lucide="file-text" class="w-5 h-5 text-orange-400"></i>
+                                    </div>
+                                    <h5 class="text-sm font-medium text-white mb-1">Logs</h5>
+                                    <p class="text-xs text-white/50">Structured logging con correlación de trazas</p>
+                                </div>
+                                <div class="text-center p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-3 border border-orange-500/20">
+                                        <i data-lucide="git-commit" class="w-5 h-5 text-orange-400"></i>
+                                    </div>
+                                    <h5 class="text-sm font-medium text-white mb-1">Trazas</h5>
+                                    <p class="text-xs text-white/50">Distributed tracing entre servicios</p>
+                                </div>
+                            </div>
+                            <p class="body-small">
+                                Dashboards en tiempo real permiten detectar anomalías en la creación de carritos, tiempos de validación y tasas de conversión por tipo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact CTA -->
+            <div class="mt-16 text-center reveal" style="transition-delay: 0.4s;">
+                <div class="surface rounded-3xl p-8 md:p-12 border border-white/10 relative overflow-hidden">
+                    <div class="gradient-mesh gradient-blue opacity-20"></div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10">
+                            <i data-lucide="message-circle" class="w-8 h-8 text-white/60"></i>
+                        </div>
+                        <h3 class="text-2xl font-display font-semibold mb-3">¿No encuentras tu respuesta?</h3>
+                        <p class="body-small mb-6 max-w-md mx-auto">
+                            El equipo de arquitectura está disponible para resolver dudas técnicas específicas sobre implementación.
+                        </p>
+                        <button class="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-sm font-medium transition-all">
+                            Contactar al equipo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="py-24 border-t border-white/5">
         <div class="content-spacing max-w-6xl mx-auto text-center">
@@ -986,6 +1473,33 @@
                 );
             });
         });
+
+        // FAQ Toggle Function
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            const icon = element.querySelector('.faq-icon');
+            const isActive = element.classList.contains('active');
+            
+            // Close all others
+            document.querySelectorAll('.faq-question').forEach(q => {
+                if (q !== element) {
+                    q.classList.remove('active');
+                    q.nextElementSibling.classList.remove('active');
+                    q.querySelector('.faq-icon').classList.remove('active');
+                }
+            });
+            
+            // Toggle current
+            element.classList.toggle('active');
+            answer.classList.toggle('active');
+            icon.classList.toggle('active');
+            
+            // Animate icon
+            gsap.fromTo(icon, 
+                { rotation: isActive ? 45 : 0 }, 
+                { rotation: isActive ? 0 : 45, duration: 0.3, ease: "power2.out" }
+            );
+        }
 
         // Architecture Diagram Functions
         function drawArchitectureLines() {
