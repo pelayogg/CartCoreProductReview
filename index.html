@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Core — Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0d0d0d;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent-blue: #007AFF;
+            --accent-purple: #AF52DE;
+            --accent-pink: #FF2D55;
+            --accent-green: #34C759;
+            --accent-orange: #FF9500;
+            --accent-cyan: #5AC8FA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'SF Pro Display', 'Inter', sans-serif;
+            letter-spacing: -0.021em;
+        }
+
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .surface {
+            background: var(--surface);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--border);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .surface:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-strong);
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 600;
+            line-height: 1.05;
+            letter-spacing: -0.015em;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: -0.021em;
+        }
+
+        .subsection-title {
+            font-size: clamp(24px, 4vw, 40px);
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.021em;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: -0.021em;
+        }
+
+        .body-large {
+            font-size: 21px;
+            line-height: 1.381;
+            font-weight: 400;
+            letter-spacing: -0.021em;
+            color: var(--text-secondary);
+        }
+
+        .body-small {
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: -0.016em;
+            color: var(--text-tertiary);
+        }
+
+        .label {
+            font-size: 12px;
+            line-height: 1.33337;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .section-spacing {
+            padding: 160px 0;
+        }
+
+        .content-spacing {
+            padding: 0 40px;
+        }
+
+        @media (max-width: 768px) {
+            .content-spacing {
+                padding: 0 24px;
+            }
+            .section-spacing {
+                padding: 100px 0;
+            }
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        .bento-card {
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .bento-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
+
+        .card-full {
+            grid-column: span 12;
+        }
+
+        .card-half {
+            grid-column: span 6;
+        }
+
+        .card-third {
+            grid-column: span 4;
+        }
+
+        @media (max-width: 1024px) {
+            .card-half, .card-third {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .card-half, .card-third {
+                grid-column: span 1;
+            }
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            inset: 0;
+            opacity: 0.4;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .gradient-blue {
+            background: radial-gradient(circle at 30% 30%, rgba(0, 122, 255, 0.3), transparent 60%);
+        }
+
+        .gradient-purple {
+            background: radial-gradient(circle at 70% 30%, rgba(175, 82, 222, 0.3), transparent 60%);
+        }
+
+        .gradient-pink {
+            background: radial-gradient(circle at 50% 70%, rgba(255, 45, 85, 0.25), transparent 60%);
+        }
+
+        .gradient-cyan {
+            background: radial-gradient(circle at 50% 50%, rgba(90, 200, 250, 0.2), transparent 70%);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
+        }
+
+        .timeline-item.active::before {
+            background: var(--accent-green);
+            box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
+        }
+
+        .feature-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .feature-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+        }
+
+        .toggle {
+            appearance: none;
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .toggle:checked {
+            background: var(--accent-green);
+        }
+
+        .toggle:checked::after {
+            transform: translateX(20px);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .status-inactive {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .connection-path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2;
+            stroke-linecap: round;
+            transition: all 0.3s ease;
+        }
+
+        .connection-path.active {
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Architecture Diagram Specific Styles */
+        .arch-node {
+            position: absolute;
+            z-index: 20;
+            transition: transform 0.3s ease;
+        }
+
+        .arch-node:hover {
+            transform: scale(1.05);
+        }
+
+        .arch-card {
+            background: rgba(20, 20, 25, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .arch-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .pulse-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 122, 255, 0.3);
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+
+        .glow-effect {
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .arch-card:hover .glow-effect {
+            opacity: 1;
+        }
+
+        .cart-type-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cart-type-card:hover {
+            transform: translateY(-4px);
+            border-color: currentColor;
+        }
+
+        .cart-type-card.active {
+            border-color: currentColor;
+            box-shadow: 0 0 30px currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 surface border-b-0" style="background: rgba(0,0,0,0.7);">
+        <div class="content-spacing max-w-7xl mx-auto h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                    <i data-lucide="layers" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="font-display font-semibold text-sm tracking-tight">Cart Core</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm">
+                <a href="#wishlist" class="nav-link">¿Qué es Wishlist Core?</a>
+                <a href="#evolution" class="nav-link">¿Qué es Cart Core a lo largo del tiempo?</a>
+                <a href="#2026" class="nav-link">¿Qué es Cart Core en 2026?</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <div class="absolute inset-0 gradient-mesh gradient-blue"></div>
+        <div class="absolute inset-0 gradient-mesh gradient-purple" style="opacity: 0.3;"></div>
+        
+        <div class="content-spacing max-w-5xl mx-auto text-center relative z-10">
+            <div class="reveal">
+                <h1 class="hero-title font-display mb-8 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                    Un usuario.<br>Múltiples carritos.<br>Infinitas posibilidades.
+                </h1>
+            </div>
+            
+            <div class="reveal flex justify-center gap-4 flex-wrap">
+                <button onclick="scrollToSection('wishlist')" class="px-8 py-4 bg-white text-black rounded-full font-medium text-sm hover:bg-white/90 transition-all transform hover:scale-105">
+                    Explorar arquitectura
+                </button>
+                <button onclick="scrollToSection('2026')" class="px-8 py-4 surface rounded-full font-medium text-sm hover:bg-white/10 transition-all">
+                    Ver tipos de carrito
+                </button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 reveal">
+            <div class="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
+                <div class="w-1 h-2 bg-white/40 rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 1: What is Wishlist Core? -->
+    <section id="wishlist" class="section-spacing relative bg-white/[0.02]">
+        <div class="content-spacing max-w-6xl mx-auto">
+            <div class="reveal mb-16">
+                <span class="label mb-4 block text-pink-400">Servicio de Persistencia</span>
+                <h2 class="section-title font-display mb-6">¿Qué es Wishlist Core?</h2>
+                <p class="body-large max-w-3xl">
+                    Es un servicio que permite guardar uno o varios listados de items en los que el usuario ha mostrado interés, de manera que gestiona la persistencia, validación y coherencia entre las diferentes listas e ítems.
+                </p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Main Description -->
+                <div class="bento-card card-full surface reveal">
+                    <div class="gradient-mesh gradient-pink opacity-20"></div>
+                    <div class="relative z-10">
+                        <h3 class="card-title mb-6">Operaciones y Capacidades</h3>
+                        <p class="body-small mb-8 max-w-3xl">
+                            El servicio y la experiencia de WishList permite además operaciones sobre las propias listas y los ítems que la componen:
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <ul class="feature-list space-y-4">
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Agregar ítems desde distintos puntos del área de venta <span class="text-white/40">(Parrillas, PDP, Carrito, Buscador, recomendador…)</span> soportando distintos tipos de ítems <span class="text-white/40">(MOCACO, SKU, other…)</span>
+                                </li>
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Control de visibilidad de las listas, pudiendo hacer públicas o privadas cada una de ellas
+                                </li>
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Soporte al traslado de ítems entre listas y hacia carrito
+                                </li>
+                            </ul>
+                            <ul class="feature-list space-y-4">
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Integración con Product Reader para validar la disponibilidad de los ítems presentes y añadidos a las listas
+                                </li>
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Capacidad para compartir listas de forma colaborativa, con estructura de seguidores, listas seguidas, etc…
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="bento-card card-third surface reveal" style="transition-delay: 0.1s;">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4 border border-pink-500/20">
+                        <i data-lucide="share-2" class="w-6 h-6 text-pink-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-2">Colaborativo</h4>
+                    <p class="text-xs text-white/40">Estructura de seguidores y listas compartidas</p>
+                </div>
+
+                <div class="bento-card card-third surface reveal" style="transition-delay: 0.2s;">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4 border border-pink-500/20">
+                        <i data-lucide="eye" class="w-6 h-6 text-pink-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-2">Visibilidad Controlada</h4>
+                    <p class="text-xs text-white/40">Listas públicas o privadas por configuración</p>
+                </div>
+
+                <div class="bento-card card-third surface reveal" style="transition-delay: 0.3s;">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-4 border border-pink-500/20">
+                        <i data-lucide="arrow-left-right" class="w-6 h-6 text-pink-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-2">Traslado Flexible</h4>
+                    <p class="text-xs text-white/40">Movimiento de ítems entre listas y carritos</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Evolution Over Time -->
+    <section id="evolution" class="section-spacing relative">
+        <div class="content-spacing max-w-5xl mx-auto">
+            <div class="reveal mb-20">
+                <span class="label mb-4 block text-blue-400">Evolución Histórica</span>
+                <h2 class="section-title font-display mb-6">¿Qué es Cart Core a lo largo del tiempo?</h2>
+                <p class="body-large">
+                    Desarrollando el producto mediante el proceso <span class="text-white font-medium">"YSI"</span> <span class="text-white/40">(¿Y si...?)</span>
+                </p>
+            </div>
+
+            <div class="space-y-12">
+                <!-- 2018 -->
+                <div class="reveal timeline-item">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2018</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">El origen</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        ¿Y si hacemos un producto que se encargue de gestionar de manera centralizada el carrito de la compra de un usuario?
+                    </p>
+                </div>
+
+                <!-- 202x -->
+                <div class="reveal timeline-item" style="transition-delay: 0.1s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">202x</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Multi-canal</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        ¿Y si no queremos que el usuario tenga el mismo carrito en su App y en el iPOD de Tienda?
+                    </p>
+                </div>
+
+                <!-- 2023 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.2s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2023</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Multi-carrito</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        ¿Y si queremos que un usuario para el mismo canal de venta pueda tener diferentes carritos en base a las diferentes experiencias de compra?
+                    </p>
+                </div>
+
+                <!-- 2024 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.3s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2024</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Validaciones Contextuales</h3>
+                    </div>
+                    <div class="space-y-4 max-w-3xl">
+                        <p class="body-large text-white/80">
+                            ¿Y si durante un streaming no queremos validar el stock al añadir el producto al carrito?
+                        </p>
+                        <p class="body-large text-white/80">
+                            ¿Y si en un proceso de cambios y resposiciones necesitamos crear un carrito?
+                        </p>
+                        <p class="body-large text-white/80">
+                            ¿Y si no queremos validarlo contra el mismo tipo de conexión de stock?
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 2026 -->
+                <div class="reveal timeline-item active" style="transition-delay: 0.4s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white">2026</span>
+                        <h3 class="subsection-title text-xl md:text-2xl text-white">Más allá del funnel</h3>
+                    </div>
+                    <p class="body-large text-white max-w-2xl">
+                        ¿Y si no nos centramos en el funnel de compra? <span class="text-blue-400">REX</span>, <span class="text-pink-400">Wishlist</span>...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Cart Core in 2026 -->
+    <section id="2026" class="section-spacing relative bg-white/[0.02]">
+        <div class="content-spacing max-w-6xl mx-auto">
+            <div class="reveal mb-16">
+                <span class="label mb-4 block text-cyan-400">Presente y Futuro</span>
+                <h2 class="section-title font-display mb-6">¿Qué es Cart Core en 2026?</h2>
+                <p class="body-large max-w-3xl">
+                    Cart Core es un sistema que permite a un mismo usuario crear y gestionar múltiples listas de elementos, validar su contenido contra sistemas externos, configurar su comportamiento mediante propósito y controlar su estado de mutabilidad, garantizando coherencia, resiliencia, escalabilidad y observabilidad.
+                </p>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="reveal mb-20">
+                <div class="relative h-[700px] w-full surface rounded-3xl border border-white/10 overflow-hidden" id="architecture-container">
+                    <div class="gradient-mesh gradient-blue opacity-20"></div>
+                    <div class="gradient-mesh gradient-purple opacity-20"></div>
+                    
+                    <svg class="connections-svg" id="architecture-svg">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="rgba(255,255,255,0.2)"/>
+                            </marker>
+                        </defs>
+                        <g id="connections-group"></g>
+                    </svg>
+
+                    <!-- User Node -->
+                    <div class="arch-node" style="top: 8%; left: 50%; transform: translateX(-50%);" id="node-user">
+                        <div class="relative">
+                            <div class="pulse-ring"></div>
+                            <div class="arch-card w-36 h-36 rounded-full flex flex-col items-center justify-center text-center border border-white/20">
+                                <div class="glow-effect bg-blue-500/20 blur-xl rounded-full"></div>
+                                <i data-lucide="user" class="w-8 h-8 text-white/80 mb-2 relative z-10"></i>
+                                <span class="text-sm font-medium relative z-10">Usuario</span>
+                                <span class="text-xs text-white/40 mt-1 relative z-10">ID: 8842</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Core Service Node -->
+                    <div class="arch-node" style="top: 38%; left: 50%; transform: translateX(-50%);" id="node-core">
+                        <div class="arch-card w-72 border-blue-500/30 relative">
+                            <div class="glow-effect bg-blue-500/10 blur-2xl"></div>
+                            <div class="flex flex-col items-center text-center relative z-10">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/25">
+                                    <i data-lucide="cpu" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-1">Cart Core</h3>
+                                <p class="text-sm text-white/50">Service Layer</p>
+                                <div class="mt-4 flex gap-2">
+                                    <span class="px-3 py-1 rounded-full bg-white/5 text-xs border border-white/10">Routing</span>
+                                    <span class="px-3 py-1 rounded-full bg-white/5 text-xs border border-white/10">Validation</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cart Types Nodes -->
+                    <div class="arch-node" style="bottom: 12%; left: 15%;" id="node-default">
+                        <div class="arch-card cart-type-card w-56 border-blue-500/30 text-blue-400" onclick="highlightCart('default')">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3 border border-blue-500/20">
+                                    <i data-lucide="shopping-bag" class="w-6 h-6 text-blue-400"></i>
+                                </div>
+                                <h4 class="font-semibold text-white mb-1">Default</h4>
+                                <p class="text-xs text-white/40 mb-3">Funnel estándar</p>
+                                <div class="flex flex-wrap gap-1 justify-center">
+                                    <span class="px-2 py-1 rounded bg-blue-500/20 text-[10px] text-blue-300">Product</span>
+                                    <span class="px-2 py-1 rounded bg-blue-500/20 text-[10px] text-blue-300">Stock</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arch-node" style="bottom: 12%; left: 50%; transform: translateX(-50%);" id="node-subcart">
+                        <div class="arch-card cart-type-card w-56 border-purple-500/30 text-purple-400" onclick="highlightCart('subcart')">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 border border-purple-500/20">
+                                    <i data-lucide="folder-open" class="w-6 h-6 text-purple-400"></i>
+                                </div>
+                                <h4 class="font-semibold text-white mb-1">Subcart</h4>
+                                <p class="text-xs text-white/40 mb-3">Experiencias</p>
+                                <div class="flex flex-wrap gap-1 justify-center">
+                                    <span class="px-2 py-1 rounded bg-purple-500/20 text-[10px] text-purple-300">Flexible</span>
+                                    <span class="px-2 py-1 rounded bg-purple-500/20 text-[10px] text-purple-300">Límites</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="arch-node" style="bottom: 12%; right: 15%;" id="node-wishlist">
+                        <div class="arch-card cart-type-card w-56 border-pink-500/30 text-pink-400" onclick="highlightCart('wishlist')">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-3 border border-pink-500/20">
+                                    <i data-lucide="heart" class="w-6 h-6 text-pink-400"></i>
+                                </div>
+                                <h4 class="font-semibold text-white mb-1">Wishlist</h4>
+                                <p class="text-xs text-white/40 mb-3">Persistencia</p>
+                                <div class="flex flex-wrap gap-1 justify-center">
+                                    <span class="px-2 py-1 rounded bg-pink-500/20 text-[10px] text-pink-300">Notif.</span>
+                                    <span class="px-2 py-1 rounded bg-pink-500/20 text-[10px] text-pink-300">Share</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="absolute bottom-6 left-6 flex gap-4 text-xs text-white/40">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span>Default</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <span>Subcart</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                            <span>Wishlist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillars -->
+            <div class="grid md:grid-cols-4 gap-6 mb-20 reveal">
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-cyan-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Coherencia</h4>
+                    <p class="text-xs text-white/40">Consistencia de datos entre listas</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4 border border-green-500/20">
+                        <i data-lucide="shield" class="w-6 h-6 text-green-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Resiliencia</h4>
+                    <p class="text-xs text-white/40">Tolerancia a fallos y recuperación</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4 border border-purple-500/20">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-purple-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Escalabilidad</h4>
+                    <p class="text-xs text-white/40">Crecimiento sin límites</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
+                        <i data-lucide="activity" class="w-6 h-6 text-orange-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Observabilidad</h4>
+                    <p class="text-xs text-white/40">Monitoreo completo del sistema</p>
+                </div>
+            </div>
+
+            <!-- Architecture Detail -->
+            <div class="bento-grid">
+                <div class="bento-card card-half surface reveal">
+                    <div class="gradient-mesh gradient-blue opacity-30"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                <i data-lucide="cpu" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <h3 class="card-title">Arquitectura</h3>
+                        </div>
+                        <p class="body-small mb-6">
+                            Sistema centralizado que gestiona múltiples instancias de carritos con configuraciones independientes.
+                        </p>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Persistencia</span>
+                                <span class="text-xs text-blue-400">Multi-lista</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Validación</span>
+                                <span class="text-xs text-blue-400">Externa</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Configuración</span>
+                                <span class="text-xs text-blue-400">Por propósito</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bento-card card-half surface reveal" style="transition-delay: 0.1s;">
+                    <div class="gradient-mesh gradient-purple opacity-30"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                                <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i>
+                            </div>
+                            <h3 class="card-title">Tipos de Carrito</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Default</p>
+                                    <p class="text-xs text-white/40">Funnel de compra estándar</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Subcart</p>
+                                    <p class="text-xs text-white/40">Experiencias específicas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Wishlist</p>
+                                    <p class="text-xs text-white/40">Persistencia de interés</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">REX</p>
+                                    <p class="text-xs text-white/40">Nuevas experiencias 2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bento-card card-full surface reveal" style="transition-delay: 0.2s;">
+                    <div class="gradient-mesh gradient-cyan opacity-20"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                                <i data-lucide="toggle-left" class="w-5 h-5 text-cyan-400"></i>
+                            </div>
+                            <h3 class="card-title">Validaciones Configurables</h3>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-3 gap-8 mt-8">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-blue-400">Default</span>
+                                    <span class="text-xs text-white/40">Estricto</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Producto</span>
+                                        <input type="checkbox" class="toggle" checked disabled>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Stock</span>
+                                        <input type="checkbox" class="toggle" checked disabled>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Límites</span>
+                                        <span class="text-xs text-white/40">Activos</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-purple-400">Subcart</span>
+                                    <span class="text-xs text-white/40">Flexible</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Producto</span>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Stock</span>
+                                        <input type="checkbox" class="toggle">
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Límites</span>
+                                        <span class="text-xs text-white/40">Configurables</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-pink-400">Wishlist</span>
+                                    <span class="text-xs text-white/40">Permisivo</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Producto</span>
+                                        <input type="checkbox" class="toggle">
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Stock</span>
+                                        <input type="checkbox" class="toggle">
+                                    </div>
+                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                        <span class="text-xs text-white/60">Notificaciones</span>
+                                        <input type="checkbox" class="toggle" checked>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-24 border-t border-white/5">
+        <div class="content-spacing max-w-6xl mx-auto text-center">
+            <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="layers" class="w-6 h-6 text-white/40"></i>
+            </div>
+            <p class="text-sm text-white/40">Cart Core Architecture</p>
+            <p class="text-xs text-white/20 mt-2">Evolución continua</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const revealElements = document.querySelectorAll('.reveal');
+        revealElements.forEach((element, index) => {
+            gsap.fromTo(element, 
+                { 
+                    opacity: 0, 
+                    y: 40 
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    },
+                    delay: element.style.transitionDelay ? parseFloat(element.style.transitionDelay) : 0
+                }
+            );
+        });
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.querySelectorAll('.toggle').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                gsap.fromTo(this, 
+                    { scale: 0.9 }, 
+                    { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                );
+            });
+        });
+
+        // Architecture Diagram Functions
+        function drawArchitectureLines() {
+            const svg = document.getElementById('architecture-svg');
+            const container = document.getElementById('architecture-container');
+            if (!svg || !container) return;
+            
+            const rect = container.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+            
+            const group = document.getElementById('connections-group');
+            group.innerHTML = '';
+
+            const user = document.getElementById('node-user').getBoundingClientRect();
+            const core = document.getElementById('node-core').getBoundingClientRect();
+            const defaultCart = document.getElementById('node-default').getBoundingClientRect();
+            const subcart = document.getElementById('node-subcart').getBoundingClientRect();
+            const wishlist = document.getElementById('node-wishlist').getBoundingClientRect();
+
+            const getCenter = (el) => ({
+                x: el.left + el.width/2 - rect.left,
+                y: el.top + el.height/2 - rect.top
+            });
+
+            const userCenter = getCenter(user);
+            const coreCenter = getCenter(core);
+            const defaultCenter = getCenter(defaultCart);
+            const subcartCenter = getCenter(subcart);
+            const wishlistCenter = getCenter(wishlist);
+
+            // User to Core
+            const line1 = createPath(userCenter.x, userCenter.y, coreCenter.x, coreCenter.y, 'user-core');
+            group.appendChild(line1);
+
+            // Core to Carts (curved)
+            const line2 = createCurvedPath(coreCenter.x, coreCenter.y, defaultCenter.x, defaultCenter.y, 'core-default');
+            const line3 = createCurvedPath(coreCenter.x, coreCenter.y, subcartCenter.x, subcartCenter.y, 'core-subcart');
+            const line4 = createCurvedPath(coreCenter.x, coreCenter.y, wishlistCenter.x, wishlistCenter.y, 'core-wishlist');
+            
+            group.appendChild(line2);
+            group.appendChild(line3);
+            group.appendChild(line4);
+        }
+
+        function createPath(x1, y1, x2, y2, id) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+            path.setAttribute('class', 'connection-path');
+            path.setAttribute('id', `line-${id}`);
+            path.setAttribute('marker-end', 'url(#arrowhead)');
+            return path;
+        }
+
+        function createCurvedPath(x1, y1, x2, y2, id) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const midY = (y1 + y2) / 2;
+            path.setAttribute('d', `M ${x1} ${y1} Q ${x1} ${midY} ${x2} ${y2}`);
+            path.setAttribute('class', 'connection-path');
+            path.setAttribute('id', `line-${id}`);
+            return path;
+        }
+
+        function highlightCart(type) {
+            // Reset all
+            document.querySelectorAll('.cart-type-card').forEach(card => {
+                card.classList.remove('active');
+                card.style.borderColor = '';
+                card.style.boxShadow = '';
+            });
+            
+            document.querySelectorAll('.connection-path').forEach(line => {
+                line.classList.remove('active');
+                line.style.stroke = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            // Highlight selected
+            const selectedNode = document.getElementById(`node-${type}`);
+            const selectedCard = selectedNode.querySelector('.cart-type-card');
+            const colors = {
+                'default': '#3b82f6',
+                'subcart': '#a855f7',
+                'wishlist': '#ec4899'
+            };
+            
+            selectedCard.classList.add('active');
+            selectedCard.style.borderColor = colors[type];
+            selectedCard.style.boxShadow = `0 0 30px ${colors[type]}40`;
+            
+            // Highlight lines
+            const userLine = document.getElementById('line-user-core');
+            const cartLine = document.getElementById(`line-core-${type}`);
+            
+            if (userLine) {
+                userLine.classList.add('active');
+                userLine.style.stroke = colors[type];
+            }
+            if (cartLine) {
+                cartLine.classList.add('active');
+                cartLine.style.stroke = colors[type];
+            }
+
+            // Animate node
+            gsap.fromTo(selectedNode, 
+                { scale: 0.95 }, 
+                { scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+            );
+        }
+
+        // Draw lines on load and resize
+        window.addEventListener('load', () => {
+            setTimeout(drawArchitectureLines, 100);
+        });
+        
+        window.addEventListener('resize', drawArchitectureLines);
+
+        // Redraw on scroll (parallax effect)
+        ScrollTrigger.addEventListener("scroll", () => {
+            requestAnimationFrame(drawArchitectureLines);
+        });
+
+        // Animate diagram on scroll into view
+        ScrollTrigger.create({
+            trigger: "#architecture-container",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.fromTo("#node-user", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.8, delay: 0 });
+                gsap.fromTo("#node-core", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, delay: 0.2 });
+                gsap.fromTo("#node-default", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, delay: 0.4 });
+                gsap.fromTo("#node-subcart", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.5 });
+                gsap.fromTo("#node-wishlist", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, delay: 0.6 });
+                
+                setTimeout(drawArchitectureLines, 800);
+            }
+        });
+    </script>
+</body>
+</html>
