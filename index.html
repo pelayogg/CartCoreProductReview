@@ -464,51 +464,53 @@
         }
 
         /* Stock selector styles */
-        .stock-selector {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
+.stock-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
 
-        .stock-option {
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+.stock-option {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
 
-        .stock-option:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
+.stock-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
 
-        .stock-option.active {
-            background: var(--accent-green);
-            color: white;
-            border-color: var(--accent-green);
-        }
+.stock-option.active {
+    background: var(--accent-green);
+    color: white;
+    border-color: var(--accent-green);
+}
 
-        /* Limit input styles */
-        .limit-input {
-            width: 60px;
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
+        
+/* Limit input styles */
+.limit-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
 
-        .limit-input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            background: rgba(255, 255, 255, 0.08);
-        }
+.limit-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.08);
+}
 
         /* FAQ Specific Styles - Keeping styles but removing content */
         .faq-item {
@@ -1077,118 +1079,121 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="bento-card card-full surface reveal" style="transition-delay: 0.2s;">
-                    <div class="gradient-mesh gradient-cyan opacity-20"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                                <i data-lucide="toggle-left" class="w-5 h-5 text-cyan-400"></i>
-                            </div>
-                            <h3 class="card-title">Validaciones Configurables</h3>
-                        </div>
-                        
-                        <div class="grid md:grid-cols-4 gap-8 mt-8">
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm font-medium text-blue-400">Default</span>
-                                    <span class="text-xs text-white/40">Estricto</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Producto</span>
-                                        <input type="checkbox" class="toggle" checked disabled>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Stock</span>
-                                        <div class="stock-selector">
-                                            <span class="stock-option active">Distribución</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Límites de líneas</span>
-                                        <input type="number" class="limit-input" value="50" min="1" max="999">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm font-medium text-purple-400">Subcart</span>
-                                    <span class="text-xs text-white/40">Flexible</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Producto</span>
-                                        <input type="checkbox" class="toggle" checked>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Stock</span>
-                                        <div class="stock-selector">
-                                            <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
-                                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
-                                            <span class="stock-option" onclick="selectStock(this)">No</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Límites de líneas</span>
-                                        <input type="number" class="limit-input" value="50" min="1" max="999">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm font-medium text-cyan-400">Replacement</span>
-                                    <span class="text-xs text-white/40">Reposición</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Producto</span>
-                                        <input type="checkbox" class="toggle" checked>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Stock</span>
-                                        <div class="stock-selector">
-                                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
-                                            <span class="stock-option active" onclick="selectStock(this)">Disponibilidad</span>
-                                            <span class="stock-option" onclick="selectStock(this)">No</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Límites de líneas</span>
-                                        <input type="number" class="limit-input" value="100" min="1" max="999">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm font-medium text-pink-400">Wishlist</span>
-                                    <span class="text-xs text-white/40">Permisivo</span>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Producto</span>
-                                        <input type="checkbox" class="toggle">
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Stock</span>
-                                        <div class="stock-selector">
-                                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
-                                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
-                                            <span class="stock-option active" onclick="selectStock(this)">No</span>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between py-2 border-t border-white/5">
-                                        <span class="text-xs text-white/60">Límites de líneas</span>
-                                        <input type="number" class="limit-input" value="200" min="1" max="999">
-                                    </div>
-                                </div>
-                            </div>
+<div class="bento-card card-full surface reveal" style="transition-delay: 0.2s;">
+    <div class="gradient-mesh gradient-cyan opacity-20"></div>
+    <div class="relative z-10">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                <i data-lucide="toggle-left" class="w-5 h-5 text-cyan-400"></i>
+            </div>
+            <h3 class="card-title">Validaciones Configurables</h3>
+        </div>
+        
+        <div class="grid md:grid-cols-4 gap-6 mt-8">
+            <!-- Default -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-blue-400">Default</span>
+                    <span class="text-xs text-white/40">Estricto</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked disabled>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option active">Distribución</span>
                         </div>
                     </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="50" min="1" max="999">
+                    </div>
                 </div>
+            </div>
+
+            <!-- Subcart -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-purple-400">Subcart</span>
+                    <span class="text-xs text-white/40">Flexible</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="50" min="1" max="999">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replacement -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-cyan-400">Replacement</span>
+                    <span class="text-xs text-white/40">Reposición</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option active" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="100" min="1" max="999">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-pink-400">Wishlist</span>
+                    <span class="text-xs text-white/40">Permisivo</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option active" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="200" min="1" max="999">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </section>
