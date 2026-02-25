@@ -672,10 +672,9 @@
                 <span class="font-display font-semibold text-sm tracking-tight">Cart Core</span>
             </div>
             <div class="hidden md:flex items-center gap-8 text-sm">
-                <a href="#evolution" class="nav-link">¿Qué es Cart Core a lo largo del tiempo?</a>
+                <a href="#evolution" class="nav-link">Evolución de Cart Core</a>
                 <a href="#wishlist" class="nav-link">¿Qué es Wishlist Core?</a>
                 <a href="#2026" class="nav-link">¿Qué es Cart Core en 2026?</a>
-                <a href="#decisiones" class="nav-link">Decisiones Técnicas</a>
             </div>
         </div>
     </nav>
@@ -705,7 +704,7 @@
         <div class="content-spacing max-w-5xl mx-auto">
             <div class="reveal mb-20">
                 <span class="label mb-4 block text-blue-400">Evolución Histórica</span>
-                <h2 class="section-title font-display mb-6">¿Qué es Cart Core a lo largo del tiempo?</h2>
+                <h2 class="section-title font-display mb-6">Evolución de Cart Core</h2>
             </div>
 
             <div class="space-y-12">
@@ -809,7 +808,7 @@
                         <div class="grid md:grid-cols-2 gap-8">
                             <ul class="feature-list space-y-4">
                                 <li class="body-small" style="color: var(--text-secondary);">
-                                    Agregar ítems desde distintos puntos del área de venta <span class="text-white/40">(Parrillas, PDP, Carrito, Buscador, recomendador…)</span> soportando distintos tipos de ítems <span class="text-white/40">(MOCACO, SKU, other…)</span>
+                                    Agregar ítems desde distintos puntos del área de venta <span class="text-white/40">(Parrillas, PDP, Carrito, Buscador, recomendador…)</span> soportando distintos tipos de ítems <span class="text-white/40">(Componente Comercial, SKU, other…)</span>
                                 </li>
                                 <li class="body-small" style="color: var(--text-secondary);">
                                     Control de visibilidad de las listas, pudiendo hacer públicas o privadas cada una de ellas
@@ -1094,7 +1093,6 @@
             <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
                 <div class="flex items-center justify-between pb-3 border-b border-white/10">
                     <span class="text-sm font-semibold text-blue-400">Default</span>
-                    <span class="text-xs text-white/40">Estricto</span>
                 </div>
                 <div class="space-y-4">
                     <div class="flex flex-col gap-2">
@@ -1104,7 +1102,9 @@
                     <div class="flex flex-col gap-2">
                         <span class="text-xs text-white/60">Stock</span>
                         <div class="stock-selector">
-                            <span class="stock-option active">Distribución</span>
+                            <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
@@ -1161,7 +1161,7 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         <span class="text-xs text-white/60">Límites de líneas</span>
-                        <input type="number" class="limit-input" value="100" min="1" max="999">
+                        <input type="number" class="limit-input" value="10" min="1" max="999">
                     </div>
                 </div>
             </div>
@@ -1187,142 +1187,13 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         <span class="text-xs text-white/60">Límites de líneas</span>
-                        <input type="number" class="limit-input" value="200" min="1" max="999">
+                        <input type="number" class="limit-input" value="500" min="1" max="999">
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section: Technical Decisions -->
-    <section id="decisiones" class="section-spacing relative bg-white/[0.02]">
-        <div class="content-spacing max-w-6xl mx-auto">
-            <div class="reveal mb-16">
-                <span class="label mb-4 block text-red-400">Arquitectura de Datos</span>
-                <h2 class="section-title font-display mb-6">Decisiones Técnicas: Separación de Wishlist Core</h2>
-                <p class="body-large max-w-3xl">
-                    Análisis de la decisión arquitectónica para migrar Wishlist Core a un nuevo slot de base de datos independiente, separándolo de Carrito Core.
-                </p>
-            </div>
-
-            <div class="bento-grid mb-16">
-                <div class="bento-card card-full surface reveal">
-                    <div class="gradient-mesh gradient-blue opacity-20"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
-                                <i data-lucide="database" class="w-5 h-5 text-red-400"></i>
-                            </div>
-                            <h3 class="card-title">Contexto de la Decisión</h3>
-                        </div>
-                        <div class="grid md:grid-cols-3 gap-6">
-                            <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i data-lucide="server" class="w-4 h-4 text-blue-400"></i>
-                                    <span class="text-sm font-medium text-white">Nuevo Slot de Carrito</span>
-                                </div>
-                                <p class="text-xs text-white/50">Creación de un slot de base de datos dedicado exclusivamente para Wishlist Core.</p>
-                            </div>
-                            <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i data-lucide="hard-drive" class="w-4 h-4 text-purple-400"></i>
-                                    <span class="text-sm font-medium text-white">Nueva Base de Datos</span>
-                                </div>
-                                <p class="text-xs text-white/50">Infraestructura de persistencia aislada para evitar interferencias.</p>
-                            </div>
-                            <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/5">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i data-lucide="arrow-left-right" class="w-4 h-4 text-orange-400"></i>
-                                    <span class="text-sm font-medium text-white">Data Migration</span>
-                                </div>
-                                <p class="text-xs text-white/50">Proceso de migración con transformaciones complejas de IDs.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="reveal mb-16">
-                <h3 class="subsection-title font-display mb-8">Comparativa: Wishlist Core vs Carrito Core</h3>
-                <div class="surface rounded-3xl overflow-hidden border border-white/10">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-white/10 bg-white/[0.02]">
-                                <th class="text-left p-6 text-sm font-medium text-white/60">Dimensión</th>
-                                <th class="text-center p-6 text-sm font-medium text-blue-400">Carrito Core</th>
-                                <th class="text-center p-6 text-sm font-medium text-pink-400">Wishlist Core</th>
-                                <th class="text-center p-6 text-sm font-medium text-white/60">Impacto</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm">
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 text-white/80">Volumen de Datos (ZA)</td>
-                                <td class="p-6 text-center text-white/60">Base</td>
-                                <td class="p-6 text-center"><span class="text-pink-400 font-semibold">+375%</span></td>
-                                <td class="p-6 text-center text-red-400">Alto</td>
-                            </tr>
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 text-white/80">Carga Black Friday 2025</td>
-                                <td class="p-6 text-center text-white/60">+15%</td>
-                                <td class="p-6 text-center"><span class="text-pink-400 font-semibold">+23%</span></td>
-                                <td class="p-6 text-center text-orange-400">Medio-Alto</td>
-                            </tr>
-                            <tr class="border-b border-white/5">
-                                <td class="p-6 text-white/80">Críticidad</td>
-                                <td class="p-6 text-center"><span class="text-red-400 text-xs">Crítico (Ventas)</span></td>
-                                <td class="p-6 text-center"><span class="text-yellow-400 text-xs">No Crítico</span></td>
-                                <td class="p-6 text-center text-red-400">Alto</td>
-                            </tr>
-                            <tr>
-                                <td class="p-6 text-white/80">Conversión Directa</td>
-                                <td class="p-6 text-center text-white/40">No soportado</td>
-                                <td class="p-6 text-center text-pink-400">Abandonado</td>
-                                <td class="p-6 text-center text-yellow-400">Cambio scope</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="reveal">
-                <div class="surface rounded-3xl p-8 border border-red-500/20">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                            <i data-lucide="gavel" class="w-6 h-6 text-red-400"></i>
-                        </div>
-                        <h3 class="text-xl font-display font-semibold text-white">Decisión Final</h3>
-                    </div>
-                    <div class="bg-white/[0.03] rounded-2xl p-6 mb-8">
-                        <p class="text-lg text-white/90">Se opta por separar la migración de Wishlist a Carrito en un <span class="text-red-400">nuevo slot</span> y una <span class="text-red-400">nueva base de datos</span> por los siguientes motivos:</p>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div>
-                            <div class="flex items-center gap-2 text-red-400 mb-2">
-                                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-                                <span class="text-sm font-semibold">Impacto en Fallos</span>
-                            </div>
-                            <p class="text-xs text-white/50">Impacto en situaciones de fallo en Carrito siendo un servicio crítico para venta cuando Wishlist no lo es.</p>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2 text-orange-400 mb-2">
-                                <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                <span class="text-sm font-semibold">Volumen de Carga</span>
-                            </div>
-                            <p class="text-xs text-white/50">Volumen de carga en aperturas especiales (BF25): +15% a +23%.</p>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2 text-pink-400 mb-2">
-                                <i data-lucide="database" class="w-4 h-4"></i>
-                                <span class="text-sm font-semibold">Volumen Documentos</span>
-                            </div>
-                            <p class="text-xs text-white/50">Cantidad de documentos en BD Wishlist vs Carrito: +375% en ZA.</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
