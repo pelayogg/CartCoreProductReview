@@ -657,7 +657,39 @@
                 margin-top: 40px;
             }
         }
+    
+        /* Line Type Selector Styles - Multi-select pills */
+        .line-type-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .line-type-option {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .line-type-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .line-type-option.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
     </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -1034,6 +1066,14 @@
                             <span class="stock-option" onclick="selectStock(this)">No</span>
                         </div>
                     </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-2">
                         <span class="text-xs text-white/60">Límites de líneas</span>
                         <input type="number" class="limit-input" value="50" min="1" max="999">
@@ -1061,6 +1101,14 @@
                             <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
                             <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
                             <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Other</span>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
@@ -1092,6 +1140,14 @@
                             <span class="stock-option" onclick="selectStock(this)">No</span>
                         </div>
                     </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
                     <div class="flex flex-col gap-2">
                         <span class="text-xs text-white/60">Límites de líneas</span>
                         <input type="number" class="limit-input" value="10" min="1" max="999">
@@ -1119,6 +1175,14 @@
                             <span class="stock-option" onclick="selectStock(this)">Distribución</span>
                             <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
                             <span class="stock-option active" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Other</span>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2">
@@ -1432,6 +1496,13 @@
                 setTimeout(drawArchitectureLines, 800);
             }
         });
+    
+        // Line type toggle function - multi-select
+        function toggleLineType(element) {
+            element.classList.toggle('active');
+            gsap.fromTo(element, { scale: 0.95 }, { scale: 1, duration: 0.2, ease: "back.out(1.7)" });
+        }
+
     </script>
 </body>
 </html>
