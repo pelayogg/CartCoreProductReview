@@ -3,750 +3,1506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Aventura de la Camiseta Mágica</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Cart Core — Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0d0d0d;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+            --accent-blue: #007AFF;
+            --accent-purple: #AF52DE;
+            --accent-pink: #FF2D55;
+            --accent-green: #34C759;
+            --accent-orange: #FF9500;
+            --accent-cyan: #5AC8FA;
+        }
 
-        html { scroll-behavior: smooth; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #ffffff;
-            color: #1a1a1a;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            overflow-x: hidden;
         }
 
-        /* ── Header ── */
-        .header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 60px;
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 100;
+        .font-display {
+            font-family: 'SF Pro Display', 'Inter', sans-serif;
+            letter-spacing: -0.021em;
         }
-        .logo {
-            font-size: 14px;
+
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .surface {
+            background: var(--surface);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--border);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .surface:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-strong);
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 96px);
             font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            font-size: 12px;
-        }
-        .nav-links a {
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
-            cursor: pointer;
-        }
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: #1a1a1a;
-            font-weight: 500;
+            line-height: 1.05;
+            letter-spacing: -0.015em;
         }
 
-        /* ── Side dots ── */
-        .nav-dots {
-            position: fixed;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 50;
+        .section-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: -0.021em;
         }
-        .dot {
-            width: 8px; height: 8px;
+
+        .subsection-title {
+            font-size: clamp(24px, 4vw, 40px);
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.021em;
+        }
+
+        .card-title {
+            font-size: 21px;
+            font-weight: 600;
+            letter-spacing: -0.021em;
+        }
+
+        .body-large {
+            font-size: 21px;
+            line-height: 1.381;
+            font-weight: 400;
+            letter-spacing: -0.021em;
+            color: var(--text-secondary);
+        }
+
+        .body-small {
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 400;
+            letter-spacing: -0.016em;
+            color: var(--text-tertiary);
+        }
+
+        .label {
+            font-size: 12px;
+            line-height: 1.33337;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .section-spacing {
+            padding: 160px 0;
+        }
+
+        .content-spacing {
+            padding: 0 40px;
+        }
+
+        @media (max-width: 768px) {
+            .content-spacing {
+                padding: 0 24px;
+            }
+            .section-spacing {
+                padding: 100px 0;
+            }
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        .bento-card {
+            border-radius: 24px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .bento-card {
+                padding: 24px;
+                border-radius: 20px;
+            }
+        }
+
+        .card-full {
+            grid-column: span 12;
+        }
+
+        .card-half {
+            grid-column: span 6;
+        }
+
+        .card-third {
+            grid-column: span 4;
+        }
+
+        @media (max-width: 1024px) {
+            .card-half, .card-third {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .card-half, .card-third {
+                grid-column: span 1;
+            }
+        }
+
+        .gradient-mesh {
+            position: absolute;
+            inset: 0;
+            opacity: 0.4;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .gradient-blue {
+            background: radial-gradient(circle at 30% 30%, rgba(0, 122, 255, 0.3), transparent 60%);
+        }
+
+        .gradient-purple {
+            background: radial-gradient(circle at 70% 30%, rgba(175, 82, 222, 0.3), transparent 60%);
+        }
+
+        .gradient-pink {
+            background: radial-gradient(circle at 50% 70%, rgba(255, 45, 85, 0.25), transparent 60%);
+        }
+
+        .gradient-cyan {
+            background: radial-gradient(circle at 50% 50%, rgba(90, 200, 250, 0.2), transparent 70%);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 8px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: #ddd;
+            background: var(--accent-blue);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
+        }
+
+        .timeline-item.active::before {
+            background: var(--accent-green);
+            box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.2);
+        }
+
+        .feature-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .feature-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+        }
+
+        .toggle {
+            appearance: none;
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            position: relative;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .dot.active {
-            background: #1a1a1a;
-            transform: scale(1.3);
-        }
 
-        /* ── PAGE LAYOUT ──
-           Left col: sticky image panel
-           Right col: scrollable content
-        ── */
-        .page-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            margin-top: 60px; /* header height */
-        }
-
-        /* ── LEFT: sticky image column ── */
-        .images-col {
-            position: sticky;
-            top: 60px;
-            height: calc(100vh - 60px);
-            background: #1a1a1a;
-            border-right: none;
-            overflow: hidden; /* clip transitions */
-        }
-
-        /* Each image panel: full size, absolutely stacked */
-        .img-panel {
+        .toggle::after {
+            content: '';
             position: absolute;
-            inset: 0;
-            opacity: 0;
-            transition: opacity 0.6s ease;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .toggle:checked {
+            background: var(--accent-green);
+        }
+
+        .toggle:checked::after {
+            transform: translateX(20px);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .status-inactive {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .connection-path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 2;
+            stroke-linecap: round;
+            transition: all 0.3s ease;
+        }
+
+        .connection-path.active {
+            stroke: rgba(255, 255, 255, 0.5);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-strong);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Architecture Diagram Specific Styles */
+        .arch-node {
+            position: absolute;
+            z-index: 20;
+            transition: transform 0.3s ease;
+        }
+
+        .arch-node:hover {
+            transform: scale(1.05);
+        }
+
+        .arch-card {
+            background: rgba(20, 20, 25, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .arch-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .pulse-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 122, 255, 0.3);
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
             pointer-events: none;
         }
-        .img-panel.active {
-            opacity: 1;
-            pointer-events: auto;
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
         }
 
-        .step-indicator {
+        .glow-effect {
             position: absolute;
-            top: 28px;
-            left: 32px;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.7);
-            text-transform: uppercase;
-            z-index: 2;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
-        .image-wrapper {
-            width: 100%;
-            height: 100%;
+        .arch-card:hover .glow-effect {
+            opacity: 1;
         }
 
-        .character-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+        .cart-type-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            background: #f0eeeb;
-            border-radius: 16px;
+        .cart-type-card:hover {
+            transform: translateY(-4px);
+            border-color: currentColor;
+        }
+
+        .cart-type-card.active {
+            border-color: currentColor;
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        /* Stock selector styles */
+.stock-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stock-option {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.stock-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.stock-option.active {
+    background: var(--accent-green);
+    color: white;
+    border-color: var(--accent-green);
+}
+
+        
+/* Limit input styles */
+.limit-input {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.limit-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+        /* FAQ Specific Styles - Keeping styles but removing content */
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--border-strong);
+        }
+
+        .faq-question {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #bbb;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-            border: 1.5px dashed #d8d5d0;
-        }
-
-        .placeholder-icon {
-            font-size: 72px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        /* ── RIGHT: scrollable content ── */
-        .content-col {
-            /* just a column, no position needed */
-        }
-
-        /* Each character section in the right col */
-        .character-section {
-            min-height: calc(100vh - 60px);
-            padding: 100px 60px 80px;
-            display: flex;
-            flex-direction: column;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .character-section:last-child {
-            border-bottom: none;
-        }
-
-        /* ── Info content (same styles as before) ── */
-        .role-tag {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 16px;
-        }
-        .character-name {
-            font-size: 42px;
-            font-weight: 600;
-            line-height: 1.1;
-            margin-bottom: 8px;
-            color: #1a1a1a;
-        }
-        .character-title {
-            font-size: 18px;
-            font-weight: 400;
-            color: #666;
-            margin-bottom: 40px;
-        }
-        .divider {
-            width: 40px;
-            height: 1px;
-            background: #1a1a1a;
-            margin: 40px 0;
-        }
-        .section-title {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 20px;
-        }
-        .description {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #333;
-            margin-bottom: 24px;
-            font-weight: 400;
-        }
-        .power-box {
-            background: #fafafa;
-            padding: 20px 24px;
-            border-radius: 0;
-            margin: 32px 0 0 0;
-            border-top: 1px solid #e8e8e8;
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .power-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: #bbb;
-            margin-bottom: 8px;
-        }
-        .power-text {
-            font-size: 15px;
-            color: #333;
-            line-height: 1.7;
-            font-weight: 300;
-        }
-        .quote-box {
-            background: #fafafa;
-            padding: 20px 24px;
-            border-bottom: 1px solid #e8e8e8;
-            margin: 0;
-        }
-        .quote-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: #bbb;
-            margin-bottom: 8px;
-        }
-        .quote {
-            font-size: 15px;
-            font-weight: 300;
-            font-style: italic;
-            color: #333;
-            line-height: 1.7;
-        }
-        .stats-section { margin: 40px 0 0 0; }
-        .stat-row {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .stat-row:first-child { border-top: 1px solid #f0f0f0; }
-        .stat-label {
-            font-size: 14px;
-            color: #555;
-            font-weight: 400;
-        }
-        .stat-stars { display: flex; gap: 2px; }
-        .star { font-size: 16px; line-height: 1; color: #ddd; font-style: normal; }
-        .star.filled { color: #1a1a1a; }
-        .complement-text {
-            background: #fafafa;
-            padding: 20px 24px;
-            border-bottom: 1px solid #e8e8e8;
-            margin-top: 0;
-        }
-        .complement-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: #bbb;
-            margin-bottom: 8px;
-        }
-        .complement-body {
-            font-size: 15px;
-            font-weight: 300;
-            color: #333;
-            line-height: 1.7;
+            padding: 24px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        /* ── Final message ── */
-        .final-message {
-            background: #1a1a1a;
-            color: white;
-            padding: 100px 60px;
-            text-align: center;
-            min-height: 50vh;
+        .faq-question:hover {
+            color: var(--text-primary);
+        }
+
+        .faq-question.active {
+            color: var(--text-primary);
+        }
+
+        .faq-icon {
+            width: 24px;
+            height: 24px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--accent-cyan);
         }
-        .final-message h2 {
-            font-size: 32px;
-            font-weight: 300;
-            margin-bottom: 24px;
-            line-height: 1.4;
+
+        .faq-icon.active {
+            transform: rotate(45deg);
         }
-        .final-message .stars-big {
-            font-size: 48px;
-            letter-spacing: 8px;
-            margin: 20px 0;
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, padding 0.3s ease;
+            opacity: 0;
         }
-        .final-message p {
-            font-size: 18px;
-            opacity: 0.8;
-            max-width: 600px;
+
+        .faq-answer.active {
+            max-height: 500px;
+            opacity: 1;
+            padding-bottom: 24px;
+        }
+
+        .faq-answer p {
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
-        /* ── Responsive ── */
-        @media (max-width: 968px) {
-            .header { padding: 0 20px; }
-            .nav-links, .nav-dots { display: none; }
-
-            .page-layout {
-                display: block;
-                margin-top: 60px;
-            }
-            .images-col { display: none; } /* hidden on mobile, inline image shown instead */
-
-            .character-section {
-                padding: 32px 24px 48px;
-                min-height: auto;
-            }
-            .character-section::before {
-                content: '';
-                display: block;
-            }
-            .mobile-image {
-                display: flex !important;
-            }
-
-            .character-name { font-size: 32px; }
+        .faq-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-right: 8px;
+            margin-bottom: 8px;
         }
 
-        /* Mobile inline image (hidden on desktop) */
-        .mobile-image {
-            display: none;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-            background: #1a1a1a;
-            padding: 0;
-            gap: 0;
-            position: relative;
+        .faq-tag-blue {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(0, 122, 255, 0.2);
         }
-        .mobile-image .image-wrapper {
-            width: 100%;
-            height: 260px;
+
+        .faq-tag-purple {
+            background: rgba(175, 82, 222, 0.1);
+            color: var(--accent-purple);
+            border: 1px solid rgba(175, 82, 222, 0.2);
         }
-        .mobile-image .step-indicator {
+
+        .faq-tag-pink {
+            background: rgba(255, 45, 85, 0.1);
+            color: var(--accent-pink);
+            border: 1px solid rgba(255, 45, 85, 0.2);
+        }
+
+        .faq-tag-green {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(52, 199, 89, 0.2);
+        }
+
+        .faq-tag-orange {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .faq-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Architecture Diagram - 4 carts layout */
+        .arch-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
             position: absolute;
-            top: 16px;
-            left: 20px;
-            z-index: 2;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1000px;
         }
+
+        @media (max-width: 1024px) {
+            .arch-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+                bottom: 5%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .arch-grid-4 {
+                grid-template-columns: 1fr;
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                margin-top: 40px;
+            }
+        }
+    
+        /* Line Type Selector Styles - Multi-select pills */
+        .line-type-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .line-type-option {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            user-select: none;
+        }
+
+        .line-type-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .line-type-option.active {
+            background: var(--accent-green);
+            color: white;
+            border-color: var(--accent-green);
+        }
+
     </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
+    <div class="noise"></div>
 
-
-
-    <header class="header">
-        <div class="logo">La Aventura</div>
-        <nav class="nav-links">
-            <a onclick="scrollToSection('chispa')">Diseño</a>
-            <a onclick="scrollToSection('forja')">Fabricación</a>
-            <a onclick="scrollToSection('ordenin')">Almacén</a>
-            <a onclick="scrollToSection('pixel')">Tecnología</a>
-            <a onclick="scrollToSection('rayo')">Transporte</a>
-            <a onclick="scrollToSection('exploradores')">Clientes</a>
-            <a onclick="scrollToSection('guia')">PO</a>
-        </nav>
-    </header>
-
-    <nav class="nav-dots">
-        <div class="dot active" onclick="scrollToSection('chispa')"></div>
-        <div class="dot" onclick="scrollToSection('forja')"></div>
-        <div class="dot" onclick="scrollToSection('ordenin')"></div>
-        <div class="dot" onclick="scrollToSection('pixel')"></div>
-        <div class="dot" onclick="scrollToSection('rayo')"></div>
-        <div class="dot" onclick="scrollToSection('exploradores')"></div>
-        <div class="dot" onclick="scrollToSection('guia')"></div>
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 surface border-b-0" style="background: rgba(0,0,0,0.7);">
+        <div class="content-spacing max-w-7xl mx-auto h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                    <i data-lucide="shopping-cart" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="font-display font-semibold text-sm tracking-tight">Cart Core</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm">
+                <a href="#evolution" class="nav-link">Evolución de Cart Core</a>
+                <a href="#wishlist" class="nav-link">¿Qué es Wishlist Core?</a>
+                <a href="#2026" class="nav-link">¿Qué es Cart Core en 2026?</a>
+            </div>
+        </div>
     </nav>
 
-    <div class="page-layout">
-
-        <!-- ══ LEFT: sticky image column ══ -->
-        <div class="images-col" id="images-col">
-
-            <div class="img-panel active" data-for="chispa">
-                <span class="step-indicator">Paso 01 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="chispa.png" alt="Chispa">
-                </div>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <div class="absolute inset-0 gradient-mesh gradient-blue"></div>
+        <div class="absolute inset-0 gradient-mesh gradient-purple" style="opacity: 0.3;"></div>
+        
+        <div class="content-spacing max-w-5xl mx-auto text-center relative z-10">
+            <div class="reveal">
+                <h1 class="hero-title font-display mb-8 bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                    Un usuario.<br>Múltiples carritos.<br>Infinitas posibilidades.
+                </h1>
             </div>
-
-            <div class="img-panel" data-for="forja">
-                <span class="step-indicator">Paso 02 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Forja.png" alt="Forja">
-                </div>
-            </div>
-
-            <div class="img-panel" data-for="ordenin">
-                <span class="step-indicator">Paso 03 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Ordeni_n.png" alt="Ordenín">
-                </div>
-            </div>
-
-            <div class="img-panel" data-for="pixel">
-                <span class="step-indicator">Paso 04 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Pixel.png" alt="Pixel">
-                </div>
-            </div>
-
-            <div class="img-panel" data-for="rayo">
-                <span class="step-indicator">Paso 05 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Rayo.png" alt="Rayo">
-                </div>
-            </div>
-
-            <div class="img-panel" data-for="exploradores">
-                <span class="step-indicator">Paso 06 / 06</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Exploradores.png" alt="Los Exploradores">
-                </div>
-            </div>
-
-            <div class="img-panel" data-for="guia">
-                <span class="step-indicator">Coordinación</span>
-                <div class="image-wrapper">
-                    <img class="character-image" src="Gui_a.png" alt="Guía">
-                </div>
-            </div>
-
         </div>
 
-        <!-- ══ RIGHT: scrollable content ══ -->
-        <div class="content-col">
+        <div class="absolute bottom-12 left-1/2 transform -translate-x-1/2 reveal">
+            <div class="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2">
+                <div class="w-1 h-2 bg-white/40 rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </section>
 
-            <!-- CHISPA -->
-            <section class="character-section" id="chispa">
-                <!-- Mobile image -->
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 01 / 06</span>
-                    <div class="image-wrapper">
-                        <img class="character-image" src="chispa.png" alt="Chispa">
+    <!-- Section 1: Evolution Over Time -->
+    <section id="evolution" class="section-spacing relative">
+        <div class="content-spacing max-w-5xl mx-auto">
+            <div class="reveal mb-20">
+                <span class="label mb-4 block text-blue-400">Evolución Histórica</span>
+                <h2 class="section-title font-display mb-6">Evolución de Cart Core</h2>
+            </div>
+
+            <div class="space-y-12">
+                <!-- 2018 -->
+                <div class="reveal timeline-item">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2018</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">El origen</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        Desarrollo de un producto que se encargue de gestionar de manera centralizada el carrito de la compra de un usuario.
+                    </p>
+                </div>
+
+                <!-- 2021 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.1s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2021</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Multi-canal</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        Capacidad de tener un carrito diferente por canal de venta.
+                    </p>
+                </div>
+
+                <!-- 2023 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.2s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2023</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Multi-carrito</h3>
+                    </div>
+                    <p class="body-large text-white/80 max-w-2xl">
+                        Carritos por propósito: Capacidad de que un usuario para el mismo canal de venta pueda tener diferentes carritos en base a las diferentes experiencias de compra.
+                    </p>
+                </div>
+
+                <!-- 2024 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.3s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2024</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Validaciones Contextuales</h3>
+                    </div>
+                    <div class="space-y-4 max-w-3xl">
+                        <p class="body-large text-white/80">
+                            Zara Streaming: capacidad de no validar el stock al añadir un producto al carrito.
+                        </p>
                     </div>
                 </div>
 
-                <span class="role-tag">Diseño</span>
-                <h1 class="character-name">Chispa</h1>
-                <p class="character-title">El Ratón de las Ideas</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Chispa es el ratón mágico que imagina cómo será la ropa antes de que exista. Transforma pensamientos en dibujos brillantes. Es el primer paso del viaje de la camiseta mágica.</p>
-                <h2 class="section-title">Quién es</h2>
-                <p class="description">Vive en el Taller de las Ideas y tiene el poder de convertir sueños en diseños. Cuando alguien dice: <em>"¡Ojalá hubiera una camiseta con dragones azules!"</em> — Chispa lo escucha y empieza a dibujar.</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Cuando se emociona, su cola brilla ligeramente y deja un rastro de chispas doradas.</p>
+                <!-- 2025 -->
+                <div class="reveal timeline-item" style="transition-delay: 0.4s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white/20">2025</span>
+                        <h3 class="subsection-title text-xl md:text-2xl">Más allá del funnel de compra</h3>
+                    </div>
+                    <div class="space-y-4 max-w-3xl">
+                        <p class="body-large text-white/80">
+                            Capacidad de crear un carrito para de cambios y reposiciones con requisitos de stock diferentes a la venta <span class="text-blue-400">REX</span>
+                        </p>
+                    </div>
                 </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                <div class="quote-box">
-                    <p class="quote-label">✦ Frase</p>
-                    <p class="quote">"Si lo imaginas, podemos crearlo"</p>
-                </div>
-                </div>
-            </section>
 
-            <!-- FORJA -->
-            <section class="character-section" id="forja">
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 02 / 06</span>
-                    <div class="image-wrapper"><img class="character-image" src="Forja.png" alt="Forja"></div>
+                <!-- 2026 -->
+                <div class="reveal timeline-item active" style="transition-delay: 0.5s;">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                        <span class="text-2xl font-display font-semibold text-white">2026</span>
+                        <h3 class="subsection-title text-xl md:text-2xl text-white">Más allá del "clásico carrito"</h3>
+                    </div>
+                    <p class="body-large text-white max-w-2xl">
+                        Capacidad de crear Wishlist como un carrito con propósito. <span class="text-pink-400">Wishlist</span>
+                    </p>
                 </div>
-                <span class="role-tag">Fabricación</span>
-                <h1 class="character-name">Forja</h1>
-                <p class="character-title">El Constructor Preciso</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Forja es el ratón que convierte los dibujos en camisetas de verdad. Usa máquinas mágicas y telas suaves. Si algo no está bien hecho… ¡lo arregla!</p>
-                <p class="description">Es quien transforma la idea en algo real.</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Cuando trabaja, aparecen pequeños engranajes brillantes y líneas de costura luminosas en el aire.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">Es el opuesto complementario de Chispa: menos ideas locas, más precisión.</p>
-                </div>
-            </section>
-
-            <!-- ORDENÍN -->
-            <section class="character-section" id="ordenin">
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 03 / 06</span>
-                    <div class="image-wrapper"><img class="character-image" src="Ordeni_n.png" alt="Ordenín"></div>
-                </div>
-                <span class="role-tag">Almacén</span>
-                <h1 class="character-name">Ordenín</h1>
-                <p class="character-title">El Guardián del Orden</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Ordenín se asegura de que cada camiseta esté en su sitio. Sabe exactamente dónde está cada prenda. Si buscas algo… ¡él lo encuentra!</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Hace que las cajas floten y se coloquen solas formando filas perfectas.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">Es el rey del orden.</p>
-                </div>
-            </section>
-
-            <!-- PIXEL -->
-            <section class="character-section" id="pixel">
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 04 / 06</span>
-                    <div class="image-wrapper"><img class="character-image" src="Pixel.png" alt="Pixel"></div>
-                </div>
-                <span class="role-tag">Tecnología / Tienda Online</span>
-                <h1 class="character-name">Pixel</h1>
-                <p class="character-title">El Mago Digital</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Pixel hace que las camisetas aparezcan en la pantalla del ordenador. Saca fotos mágicas y pone el botón de "Comprar". Si la web se estropea… ¡lo arregla!</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Iconos digitales flotantes, botones luminosos y pequeñas pantallas holográficas.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">Es creativo pero también técnico.</p>
-                </div>
-            </section>
-
-            <!-- RAYO -->
-            <section class="character-section" id="rayo">
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 05 / 06</span>
-                    <div class="image-wrapper"><img class="character-image" src="Rayo.png" alt="Rayo"></div>
-                </div>
-                <span class="role-tag">Transporte</span>
-                <h1 class="character-name">Rayo</h1>
-                <p class="character-title">El Viajero Veloz</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Rayo lleva las camisetas de un lugar a otro. Va rápido, pero con cuidado. Gracias a él, los pedidos llegan a casa.</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Estelas de luz suaves cuando corre y pequeños caminos brillantes que aparecen delante.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">No es el más creativo, pero sin él nada llega.</p>
-                </div>
-            </section>
-
-            <!-- EXPLORADORES -->
-            <section class="character-section" id="exploradores">
-                <div class="mobile-image">
-                    <span class="step-indicator">Paso 06 / 06</span>
-                    <div class="image-wrapper"><img class="character-image" src="Exploradores.png" alt="Los Exploradores"></div>
-                </div>
-                <span class="role-tag">Clientes</span>
-                <h1 class="character-name">Los Exploradores</h1>
-                <p class="character-title">Los Ratones que Deciden</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Son los ratones que buscan ropa que les guste. Eligen colores, prueban cosas y dicen si están contentos o no.</p>
-                <p class="description">Son los que deciden qué funciona y qué no.</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Cuando les gusta algo, aparece un pequeño corazón brillante. Cuando no les gusta, aparece una nube pensativa.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">Son importantes porque sin ellos no habría misión.</p>
-                </div>
-            </section>
-
-            <!-- GUÍA -->
-            <section class="character-section" id="guia">
-                <div class="mobile-image">
-                    <span class="step-indicator">Coordinación</span>
-                    <div class="image-wrapper"><img class="character-image" src="Gui_a.png" alt="Guía"></div>
-                </div>
-                <span class="role-tag">Product Owner</span>
-                <h1 class="character-name">Guía</h1>
-                <p class="character-title">El Ratón Coordinador</p>
-                <div class="divider"></div>
-                <h2 class="section-title">Su misión</h2>
-                <p class="description">Guía no fabrica. No transporta. No diseña.</p>
-                <p class="description">Pero habla con todos. Escucha problemas. Decide qué es lo más importante hacer primero.</p>
-                <p class="description">Su trabajo es que todo el equipo funcione como una orquesta.</p>
-                <div class="power-box">
-                    <p class="power-label">✦ Poder mágico</p>
-                    <p class="power-text">Tiene un pequeño mapa luminoso donde ve todo el proceso. Cuando algo se desordena, puede hacer aparecer hilos de luz que conectan a los ratones.</p>
-                </div>
-                <div class="stats-section">
-                    <h2 class="section-title">Habilidades</h2>
-                    <div class="stat-row"><span class="stat-label">Curiosidad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Creatividad</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Atención al detalle</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Organización</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star">★</i></div></div>
-                    <div class="stat-row"><span class="stat-label">Trabajo en equipo</span><div class="stat-stars"><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i><i class="star filled">★</i></div></div>
-                </div>
-                </div>
-                </div>
-                <div class="complement-text">
-                    <p class="complement-label">✦ En el equipo</p>
-                    <p class="complement-body">Su superpoder principal es unir al equipo.</p>
-                </div>
-            </section>
-
-        </div><!-- end content-col -->
-    </div><!-- end page-layout -->
-
-    <!-- Final message (outside page-layout, full width) -->
-    <section class="final-message">
-        <h2>Ningún ratón tiene todas las estrellas.<br>Pero cuando juntamos sus poderes...</h2>
-        <div class="stars-big">⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐</div>
-        <p>¡El equipo es imparable!</p>
+            </div>
+        </div>
     </section>
 
+    <!-- Section 2: What is Wishlist Core? -->
+    <section id="wishlist" class="section-spacing relative bg-white/[0.02]">
+        <div class="content-spacing max-w-6xl mx-auto">
+            <div class="reveal mb-16">
+                <span class="label mb-4 block text-pink-400">Wishlist Core</span>
+                <h2 class="section-title font-display mb-6">¿Qué es Wishlist Core?</h2>
+                <p class="body-large max-w-3xl">
+                    Es un servicio que permite guardar uno o varios listados de items en los que el usuario ha mostrado interés, de manera que gestiona la persistencia, validación y coherencia entre las diferentes listas e ítems.
+                </p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Main Description -->
+                <div class="bento-card card-full surface reveal">
+                    <div class="gradient-mesh gradient-pink opacity-20"></div>
+                    <div class="relative z-10">
+                        <h3 class="card-title mb-6">Operaciones y Capacidades</h3>
+                        <p class="body-small mb-8 max-w-3xl">
+                            El servicio de WishList Core permite además operaciones sobre las propias listas y los ítems que la componen:
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <ul class="feature-list space-y-4">
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Agregar ítems desde distintos puntos del área de venta <span class="text-white/40">(Parrillas, PDP, Carrito, Buscador, recomendador…)</span> soportando distintos tipos de ítems <span class="text-white/40">(Componente Comercial, SKU, other…)</span>
+                                </li>
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Control de visibilidad de las listas, pudiendo hacer públicas o privadas cada una de ellas
+                                </li>
+                            </ul>
+                            <ul class="feature-list space-y-4">
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Integración con Product Reader para validar la disponibilidad de los ítems presentes y añadidos a las listas
+                                </li>
+                                <li class="body-small" style="color: var(--text-secondary);">
+                                    Capacidad para compartir listas.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Cart Core in 2026 -->
+    <section id="2026" class="section-spacing relative bg-white/[0.02]">
+        <div class="content-spacing max-w-6xl mx-auto">
+            <div class="reveal mb-16">
+                <span class="label mb-4 block text-cyan-400">Presente y Futuro</span>
+                <h2 class="section-title font-display mb-6">¿Qué es Cart Core en 2026?</h2>
+                <p class="body-large max-w-3xl">
+                    Cart Core es un sistema que permite a un mismo usuario crear y gestionar múltiples listas de elementos, validar su contenido contra sistemas externos, configurar su comportamiento mediante propósito y controlar su estado de mutabilidad, garantizando coherencia, resiliencia, escalabilidad y observabilidad.
+                </p>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="reveal mb-20">
+                <div class="relative h-[800px] w-full surface rounded-3xl border border-white/10 overflow-hidden" id="architecture-container">
+                    <div class="gradient-mesh gradient-blue opacity-20"></div>
+                    <div class="gradient-mesh gradient-purple opacity-20"></div>
+                    
+                    <svg class="connections-svg" id="architecture-svg">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="rgba(255,255,255,0.2)"/>
+                            </marker>
+                        </defs>
+                        <g id="connections-group"></g>
+                    </svg>
+
+                    <!-- User Node -->
+                    <div class="arch-node" style="top: 8%; left: 50%; transform: translateX(-50%);" id="node-user">
+                        <div class="relative">
+                            <div class="pulse-ring"></div>
+                            <div class="arch-card w-36 h-36 rounded-full flex flex-col items-center justify-center text-center border border-white/20">
+                                <div class="glow-effect bg-blue-500/20 blur-xl rounded-full"></div>
+                                <i data-lucide="user" class="w-8 h-8 text-white/80 mb-2 relative z-10"></i>
+                                <span class="text-sm font-medium relative z-10">Usuario</span>
+                                <span class="text-xs text-white/40 mt-1 relative z-10">ID: 8842</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Core Service Node -->
+                    <div class="arch-node" style="top: 32%; left: 50%; transform: translateX(-50%);" id="node-core">
+                        <div class="arch-card w-72 border-blue-500/30 relative">
+                            <div class="glow-effect bg-blue-500/10 blur-2xl"></div>
+                            <div class="flex flex-col items-center text-center relative z-10">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/25">
+                                    <i data-lucide="cpu" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold mb-1">Cart Core</h3>
+                                <p class="text-sm text-white/50">Service Layer</p>
+                                <div class="mt-4 flex gap-2">
+                                    <span class="px-3 py-1 rounded-full bg-white/5 text-xs border border-white/10">Lógica Core</span>
+                                    <span class="px-3 py-1 rounded-full bg-white/5 text-xs border border-white/10">Resiliencia</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cart Types Grid - 4 columns -->
+                    <div class="arch-grid-4">
+                        <!-- Default -->
+                        <div class="arch-node" style="position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none;" id="node-default">
+                            <div class="arch-card cart-type-card w-full border-blue-500/30 text-blue-400" onclick="highlightCart('default')">
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-3 border border-blue-500/20">
+                                        <i data-lucide="shopping-cart" class="w-6 h-6 text-blue-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-white mb-1">Default</h4>
+                                    <p class="text-xs text-white/40 mb-3">Funnel estándar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subcart -->
+                        <div class="arch-node" style="position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none;" id="node-subcart">
+                            <div class="arch-card cart-type-card w-full border-purple-500/30 text-purple-400" onclick="highlightCart('subcart')">
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-3 border border-purple-500/20">
+                                        <i data-lucide="shopping-basket" class="w-6 h-6 text-purple-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-white mb-1">Subcart</h4>
+                                    <p class="text-xs text-white/40 mb-3">Cesta seleccionable</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Replacement - NEW -->
+                        <div class="arch-node" style="position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none;" id="node-replacement">
+                            <div class="arch-card cart-type-card w-full border-cyan-500/30 text-cyan-400" onclick="highlightCart('replacement')">
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-3 border border-cyan-500/20">
+                                        <i data-lucide="refresh-cw" class="w-6 h-6 text-cyan-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-white mb-1">Replacement</h4>
+                                    <p class="text-xs text-white/40 mb-3">Gestión de reposiciones</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wishlist -->
+                        <div class="arch-node" style="position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none;" id="node-wishlist">
+                            <div class="arch-card cart-type-card w-full border-pink-500/30 text-pink-400" onclick="highlightCart('wishlist')">
+                                <div class="flex flex-col items-center text-center">
+                                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center mb-3 border border-pink-500/20">
+                                        <i data-lucide="heart" class="w-6 h-6 text-pink-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-white mb-1">Wishlist</h4>
+                                    <p class="text-xs text-white/40 mb-3">Lista de elementos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="absolute bottom-6 left-6 flex gap-4 text-xs text-white/40">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span>Default</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <span>Subcart</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                            <span>Replacement</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                            <span>Wishlist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillars -->
+            <h3 class="section-title font-display mb-6">Nuevas capacidades para nuevos retos</h3>
+            <div class="grid md:grid-cols-4 gap-6 mb-20 reveal">
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center mx-auto mb-4 border border-cyan-500/20">
+                        <i data-lucide="share-2" class="w-6 h-6 text-cyan-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Compartir</h4>
+                    <p class="text-xs text-white/40">Posibilidad de compartir carritos. Se crea el concepto de carrito público o privado.</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4 border border-green-500/20">
+                        <i data-lucide="timer" class="w-6 h-6 text-green-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">TTL</h4>
+                    <p class="text-xs text-white/40">Tiempo de vida de los carritos configurable por propósito</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4 border border-purple-500/20">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-purple-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Validaciones</h4>
+                    <p class="text-xs text-white/40">Posibilidad de configurar qué validaciones de stock y producto queremos usar por propósito</p>
+                </div>
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4 border border-purple-500/20">
+                        <i data-lucide="pencil" class="w-6 h-6 text-purple-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Control de mutabilidad</h4>
+                    <p class="text-xs text-white/40">Un carrito podrá ser modificable siempre o no dependiendo de su propósito</p>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-1 gap-6 mb-20 reveal">
+                <div class="surface rounded-2xl p-6 text-center border border-white/5 hover:border-white/10 transition-all max-w-xs mx-auto">
+                    <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4 border border-orange-500/20">
+                        <i data-lucide="circle-plus" class="w-6 h-6 text-orange-400"></i>
+                    </div>
+                    <h4 class="font-medium text-sm mb-1">Nuevos tipos de items soportados</h4>
+                    <p class="text-xs text-white/40">Se da soporta a líneas de tipo componente comercial</p>
+                </div>
+            </div>
+
+            
+<div class="bento-card card-full surface reveal" style="transition-delay: 0.1s;">
+    <div class="gradient-mesh gradient-cyan opacity-20"></div>
+    <div class="relative z-10">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                <i data-lucide="toggle-left" class="w-5 h-5 text-cyan-400"></i>
+            </div>
+            <h3 class="card-title">Validaciones Configurables</h3>
+        </div>
+        
+        <div class="grid md:grid-cols-4 gap-6 mt-8">
+            <!-- Default -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-blue-400">Default</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="50" min="1" max="999">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Submiteable</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subcart -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-purple-400">Subcart</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option active" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="50" min="1" max="999">
+                    </div>
+                     <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Submiteable</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Replacement -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-cyan-400">Replacement</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option active" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="10" min="1" max="999">
+                    </div>
+                     <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Submiteable</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wishlist -->
+            <div class="space-y-6 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                    <span class="text-sm font-semibold text-pink-400">Wishlist</span>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Producto</span>
+                        <input type="checkbox" class="toggle" checked>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Stock</span>
+                        <div class="stock-selector">
+                            <span class="stock-option" onclick="selectStock(this)">Distribución</span>
+                            <span class="stock-option" onclick="selectStock(this)">Disponibilidad</span>
+                            <span class="stock-option active" onclick="selectStock(this)">No</span>
+                        </div>
+                    </div>
+                                        <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Tipos de línea</span>
+                        <div class="line-type-selector">
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Producto</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Componente Comercial</span>
+                            <span class="line-type-option active" onclick="toggleLineType(this)">Other</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Límites de líneas</span>
+                        <input type="number" class="limit-input" value="500" min="1" max="999">
+                    </div>
+                     <div class="flex flex-col gap-2">
+                        <span class="text-xs text-white/60">Submiteable</span>
+                        <input type="checkbox" class="toggle">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <h3 class="section-title font-display mb-6 mt-20"> Sin olvidar nuestras capacidades claves actuales</h3>
+            <!-- Architecture Detail -->
+            <div class="bento-grid">
+                <div class="bento-card card-third surface reveal">
+                    <div class="gradient-mesh gradient-blue opacity-30"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                                <i data-lucide="shield" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <h3 class="card-title">Solución confiable</h3>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Políticas de resiliencia y fallback.</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Gestión de traspasos y hermanados.</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Escalabilidad en eventos.</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Observabilidad: métricas y eventos.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bento-card card-third surface reveal" style="transition-delay: 0.1s;">
+                    <div class="gradient-mesh gradient-purple opacity-30"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 text-purple-400"></i>
+                            </div>
+                            <h3 class="card-title">Carrito por propósito</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Default</p>
+                                    <p class="text-xs text-white/40">Funnel de compra estándar</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Subcart, BuyNow, ...</p>
+                                    <p class="text-xs text-white/40">Experiencias específicas de compra</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Replacement</p>
+                                    <p class="text-xs text-white/40">Gestión de reposiciones</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                                <div>
+                                    <p class="text-sm font-medium">Wishlist</p>
+                                    <p class="text-xs text-white/40">Lista de elementos sin necesidad de intención de compra</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bento-card card-third surface reveal" style="transition-delay: 0.2s;">
+                    <div class="gradient-mesh gradient-orange opacity-30"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                                <i data-lucide="sparkles" class="w-5 h-5 text-orange-400"></i>
+                            </div>
+                            <h3 class="card-title">One more thing</h3>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Personalizaciones</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">Servicios</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-white/5">
+                                <span class="text-sm text-white/60">GiftCard Virtual y física</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-24 border-t border-white/5">
+        <div class="content-spacing max-w-6xl mx-auto text-center">
+            <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="shopping-cart" class="w-6 h-6 text-white/40"></i>
+            </div>
+            <p class="text-sm text-white/40">Cart Core</p>
+        </div>
+    </footer>
+
     <script>
-        const sections    = ['chispa','forja','ordenin','pixel','rayo','exploradores','guia'];
-        const dots        = document.querySelectorAll('.dot');
-        const navLinks    = document.querySelectorAll('.nav-links a');
-        const imgPanels   = document.querySelectorAll('.img-panel');
+        lucide.createIcons();
 
-        function setActive(id) {
-            // dots & nav
-            dots.forEach((d, i) => d.classList.toggle('active', sections[i] === id));
-            navLinks.forEach((a, i) => a.classList.toggle('active', sections[i] === id));
-            // image panels
-            imgPanels.forEach(p => p.classList.toggle('active', p.dataset.for === id));
-        }
+        gsap.registerPlugin(ScrollTrigger);
 
-        // Scroll-based active section — works in both directions (up and down)
-        function getActiveSection() {
-            const triggerY = window.innerHeight * 0.15; // 15% from top = where the name appears
-            let active = sections[0];
-            for (const id of sections) {
-                const el = document.getElementById(id);
-                if (!el) continue;
-                const rect = el.getBoundingClientRect();
-                // Section top has passed the trigger line
-                if (rect.top <= triggerY) {
-                    active = id;
+        const revealElements = document.querySelectorAll('.reveal');
+        revealElements.forEach((element, index) => {
+            gsap.fromTo(element, 
+                { 
+                    opacity: 0, 
+                    y: 40 
+                },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 85%",
+                        toggleActions: "play none none reverse"
+                    },
+                    delay: element.style.transitionDelay ? parseFloat(element.style.transitionDelay) : 0
                 }
-            }
-            return active;
-        }
-
-        window.addEventListener('scroll', () => {
-            setActive(getActiveSection());
-        }, { passive: true });
-
-        // Init on load
-        setActive(getActiveSection());
+            );
+        });
 
         function scrollToSection(id) {
-            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
+
+        document.querySelectorAll('.toggle').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                gsap.fromTo(this, 
+                    { scale: 0.9 }, 
+                    { scale: 1, duration: 0.3, ease: "back.out(1.7)" }
+                );
+            });
+        });
+
+        // Stock selector function
+        function selectStock(element) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.stock-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+            
+            gsap.fromTo(element, 
+                { scale: 0.9 }, 
+                { scale: 1, duration: 0.2, ease: "back.out(1.7)" }
+            );
+        }
+
+        // Architecture Diagram Functions
+        function drawArchitectureLines() {
+            const svg = document.getElementById('architecture-svg');
+            const container = document.getElementById('architecture-container');
+            if (!svg || !container) return;
+            
+            const rect = container.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+            
+            const group = document.getElementById('connections-group');
+            group.innerHTML = '';
+
+            const user = document.getElementById('node-user').getBoundingClientRect();
+            const core = document.getElementById('node-core').getBoundingClientRect();
+            const defaultCart = document.getElementById('node-default').getBoundingClientRect();
+            const subcart = document.getElementById('node-subcart').getBoundingClientRect();
+            const replacement = document.getElementById('node-replacement').getBoundingClientRect();
+            const wishlist = document.getElementById('node-wishlist').getBoundingClientRect();
+
+            const getCenter = (el) => ({
+                x: el.left + el.width/2 - rect.left,
+                y: el.top + el.height/2 - rect.top
+            });
+
+            const userCenter = getCenter(user);
+            const coreCenter = getCenter(core);
+            const defaultCenter = getCenter(defaultCart);
+            const subcartCenter = getCenter(subcart);
+            const replacementCenter = getCenter(replacement);
+            const wishlistCenter = getCenter(wishlist);
+
+            // User to Core
+            const line1 = createPath(userCenter.x, userCenter.y, coreCenter.x, coreCenter.y, 'user-core');
+            group.appendChild(line1);
+
+            // Core to Carts (curved)
+            const line2 = createCurvedPath(coreCenter.x, coreCenter.y, defaultCenter.x, defaultCenter.y, 'core-default');
+            const line3 = createCurvedPath(coreCenter.x, coreCenter.y, subcartCenter.x, subcartCenter.y, 'core-subcart');
+            const line4 = createCurvedPath(coreCenter.x, coreCenter.y, replacementCenter.x, replacementCenter.y, 'core-replacement');
+            const line5 = createCurvedPath(coreCenter.x, coreCenter.y, wishlistCenter.x, wishlistCenter.y, 'core-wishlist');
+            
+            group.appendChild(line2);
+            group.appendChild(line3);
+            group.appendChild(line4);
+            group.appendChild(line5);
+        }
+
+        function createPath(x1, y1, x2, y2, id) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+            path.setAttribute('class', 'connection-path');
+            path.setAttribute('id', `line-${id}`);
+            path.setAttribute('marker-end', 'url(#arrowhead)');
+            return path;
+        }
+
+        function createCurvedPath(x1, y1, x2, y2, id) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const midY = (y1 + y2) / 2;
+            path.setAttribute('d', `M ${x1} ${y1} Q ${x1} ${midY} ${x2} ${y2}`);
+            path.setAttribute('class', 'connection-path');
+            path.setAttribute('id', `line-${id}`);
+            return path;
+        }
+
+        function highlightCart(type) {
+            // Reset all
+            document.querySelectorAll('.cart-type-card').forEach(card => {
+                card.classList.remove('active');
+                card.style.borderColor = '';
+                card.style.boxShadow = '';
+            });
+            
+            document.querySelectorAll('.connection-path').forEach(line => {
+                line.classList.remove('active');
+                line.style.stroke = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            // Highlight selected
+            const selectedNode = document.getElementById(`node-${type}`);
+            const selectedCard = selectedNode.querySelector('.cart-type-card');
+            const colors = {
+                'default': '#3b82f6',
+                'subcart': '#a855f7',
+                'replacement': '#06b6d4',
+                'wishlist': '#ec4899'
+            };
+            
+            selectedCard.classList.add('active');
+            selectedCard.style.borderColor = colors[type];
+            selectedCard.style.boxShadow = `0 0 30px ${colors[type]}40`;
+            
+            // Highlight lines
+            const userLine = document.getElementById('line-user-core');
+            const cartLine = document.getElementById(`line-core-${type}`);
+            
+            if (userLine) {
+                userLine.classList.add('active');
+                userLine.style.stroke = colors[type];
+            }
+            if (cartLine) {
+                cartLine.classList.add('active');
+                cartLine.style.stroke = colors[type];
+            }
+
+            // Animate node
+            gsap.fromTo(selectedNode, 
+                { scale: 0.95 }, 
+                { scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+            );
+        }
+
+        // Draw lines on load and resize
+        window.addEventListener('load', () => {
+            setTimeout(drawArchitectureLines, 100);
+        });
+        
+        window.addEventListener('resize', drawArchitectureLines);
+
+        // Redraw on scroll (parallax effect)
+        ScrollTrigger.addEventListener("scroll", () => {
+            requestAnimationFrame(drawArchitectureLines);
+        });
+
+        // Animate diagram on scroll into view
+        ScrollTrigger.create({
+            trigger: "#architecture-container",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.fromTo("#node-user", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.8, delay: 0 });
+                gsap.fromTo("#node-core", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.8, delay: 0.2 });
+                gsap.fromTo("#node-default", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, delay: 0.4 });
+                gsap.fromTo("#node-subcart", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.5 });
+                gsap.fromTo("#node-replacement", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.6 });
+                gsap.fromTo("#node-wishlist", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.6, delay: 0.7 });
+                
+                setTimeout(drawArchitectureLines, 800);
+            }
+        });
+    
+        // Line type toggle function - multi-select
+        function toggleLineType(element) {
+            element.classList.toggle('active');
+            gsap.fromTo(element, { scale: 0.95 }, { scale: 1, duration: 0.2, ease: "back.out(1.7)" });
+        }
+
     </script>
 </body>
 </html>
